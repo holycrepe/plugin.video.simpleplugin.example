@@ -117,9 +117,6 @@ def list_videos(params):
 def play(params):
     """
     Play a video by the provided path.
-
-    :param params: plugin call parameters.
-    :return: str - a playable path to a videofile.
     """
     path = params.video
     # Return a path for Kodi to play
