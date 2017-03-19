@@ -52,7 +52,6 @@ def get_categories():
     Here you can insert some parsing code that retrieves
     the list of video categories (e.g. 'Movies', 'TV-shows', 'Documentaries' etc.)
     from some site or server.
-    :return: list
     """
     return VIDEOS.keys()
 
@@ -63,25 +62,20 @@ def get_videos(category):
 
     Here you can insert some parsing code that retrieves
     the list of videostreams in a given category from some site or server.
-    :param category: str
-    :return: list
     """
     return VIDEOS[category]
 
 
-def list_categories(params):
+@plugin.action()
+def root():
     """
     Create the list of video categories in the Kodi interface.
-
-    :param params: dict - a dictionary with plugin call parameters.
-    :return: dict
     """
-    listing = []
     # Get video categories
     categories = get_categories()
-    # Iterate through categories
+    # Iterate through categories and yield list items for Kodi to display
     for category in categories:
-        listing.append({
+        yield {
             # Item label
             'label': category,
             # Item thumbnail
@@ -93,29 +87,19 @@ def list_categories(params):
             # Since this item will open a sub-listing,
             # we don't specify 'is_folder' and 'is_playable' parameters explicitly,
             # leaving them to their default values (True and False respectively).
-        })
-    # Return the list of video categories for Kodi to display
-    # Here we use plugin.create_listing method to specify additional parameter - view_mode.
-    # '500' corresponds to Confluence skin 'Thumbnail' view.
-    # Note: other skins have their own view_mode numeric codes!
-    # Look into 'MyVideoNav.xml' file of your favorite skin
-    # to find the necessary view_mode codes.
-    return plugin.create_listing(listing, view_mode=500)
+        }
 
 
+@plugin.action()
 def list_videos(params):
     """
     Create the list of playable videos in the Kodi interface.
-
-    :param params: dict - a dictionary with plugin call parameters.
-    :return: list
     """
-    listing = []
     # Get the list of videos in the category.
-    videos = get_videos(params['category'])
-    # Iterate through videos.
+    videos = get_videos(params.category)
+    # Iterate through videos and yield list items for Kodi to display
     for video in videos:
-        listing.append({
+        yield {
             # Item label
             'label': video['name'],
             # Item thumbnail
@@ -126,29 +110,22 @@ def list_videos(params):
             'url': plugin.get_url(action='play', video=video['video']),
             # The item is playable
             'is_playable': True
-        })
-    # Return the list of videos in a chosen category for Kodi to display
-    # Here we simply return a listing so Kodi will display it with default settings.
-    return listing
+        }
 
 
-def play_video(params):
+@plugin.action()
+def play(params):
     """
     Play a video by the provided path.
 
-    :param params: dict - a dictionary with plugin call parameters.
+    :param params: plugin call parameters.
     :return: str - a playable path to a videofile.
     """
-    path = params['video']
+    path = params.video
     # Return a path for Kodi to play
     return path
 
 
-# Map actions
-# Note that we map callable objects without brackets ()
-plugin.actions['root'] = list_categories  # 'root' item is mandatory!
-plugin.actions['list_videos'] = list_videos
-plugin.actions['play'] = play_video
 if __name__ == '__main__':
     # Run our plugin
     plugin.run()
